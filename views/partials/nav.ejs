@@ -11,12 +11,14 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
       <form action="/logout" method="post" id="my_form">
- 
         <ul class="nav navbar-nav navbar-right">
-          <li id="loginLink"><a href="/login">Sign In/Create Account</a></li>
-          <li id="logoutLink">
+          <% if (user != null) { %>
+            <li id="logoutLink">
               <a href="javascript:{}" onclick="document.getElementById('my_form').submit(); return false;">Sign Out</a>
-          </li>
+            </li>
+          <% } else { %>
+            <li id="loginLink"><a href="/login">Sign In/Create Account</a></li>
+          <% }%>
         </ul>
       </div>
       </form>

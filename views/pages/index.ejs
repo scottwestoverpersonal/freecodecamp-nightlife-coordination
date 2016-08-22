@@ -11,6 +11,10 @@
 
   <!-- Begin Container -->
 <div class="container">
+  <div class="row center">
+    <p>No Plans Tonight?</p>
+    <p>Find a bar near you and reserve ahead of time! <br>This app was built using the Yelp API.</p> 
+  </div>
   <div class="row">
         <div class="input-group">
       <input type="text" class="form-control" placeholder="Search for..." id="seachInput">
@@ -25,6 +29,23 @@
   <!-- /.container -->
 
 <script>
+$(function() {
+  if (typeof(Storage) !== "undefined") {
+    if (sessionStorage.search) {
+      $('#seachInput').val(sessionStorage.getItem("search"));
+      $.ajax({
+        type: 'GET',
+        url: '/yelp?loc='+sessionStorage.getItem("search"),
+        success: function(data) {
+          updatePage(data);
+        }
+    });
+    }
+  } else {
+      console.log("Sorry, your browser does not support Web Storage...");
+  }
+});
+
 function yelpInfo() {
   var loc = $('#seachInput').val();
   // store the location
@@ -40,43 +61,44 @@ function yelpInfo() {
         type: 'GET',
         url: '/yelp?loc='+loc,
         success: function(data) {
-            console.log(data);
-            var html = "";
-            $('#results').html(html);
-            for(var i = 0; i < data.businesses.length; i++){
-              html += "<div class='row dot'>";
-              html += "<div class='col-xs-2'><img src='"+data.businesses[i].image_url+"' /></div>";
-               html += "<div class='col-xs-8'><b><span>"+data.businesses[i].name+"</span></b><div>"+data.businesses[i].snippet_text+"</div><div>Rating: "+data.businesses[i].rating+"</div></div>";
-              html += "<div class='col-xs-2 center'><div> 0 Going</div><a href='' class='btn btn-success'>GO</a></div>";
-              html += "</div>";
-            }
-            $('#results').html(html);
+          updatePage(data);
         }
     });
 }
-  if (typeof(Storage) !== "undefined") {
-    if (sessionStorage.search) {
-      $('#seachInput').val(sessionStorage.getItem("search"));
-      $.ajax({
-        type: 'GET',
-        url: '/yelp?loc='+sessionStorage.getItem("search"),
-        success: function(data) {
-            console.log(data);
-            var html = "";
-            $('#results').html(html);
-            for(var i = 0; i < data.businesses.length; i++){
-              html += "<div class='row dot'>";
-              html += "<div class='col-xs-2'><img src='"+data.businesses[i].image_url+"' /></div>";
-               html += "<div class='col-xs-8'><b><span>"+data.businesses[i].name+"</span></b><div>"+data.businesses[i].snippet_text+"</div><div>Rating: "+data.businesses[i].rating+"</div></div>";
-              html += "<div class='col-xs-2 center'><div> 0 Going</div><a href='' class='btn btn-success'>GO</a></div>";
-              html += "</div>";
-            }
-            $('#results').html(html);
+function updatePage(data) {
+    var html = "";
+    $('#results').html(html);
+    for(var i = 0; i < data.businesses.length; i++){
+      var totalGoing = 0;
+      if(data.hasOwnProperty("dbBars")){
+        if(data.dbBars.hasOwnProperty(data.businesses[i].id)){
+          totalGoing = data.dbBars[data.businesses[i].id].total;
         }
-    });
+      }
+      html += "<div class='row dot'>";
+      html += "<div class='col-xs-2'><img src='"+data.businesses[i].image_url+"' /></div>";
+       html += "<div class='col-xs-8'><b><span>"+data.businesses[i].name+"</span></b><div>"+data.businesses[i].snippet_text+"</div><div>Rating: "+data.businesses[i].rating+"</div></div>";
+       // check to see if user data was passed, if it was then check to see if it contains this business id, and set the state accordingly
+       if(data.hasOwnProperty("userChoices")){
+         if(data.userChoices.hasOwnProperty(data.businesses[i].id)){
+          // if it is true, then the user is already going to the bar
+          if(data.userChoices[data.businesses[i].id]){
+          html += "<div class='col-xs-2 center'><div> "+totalGoing+" Going</div><a href='/update?id="+data.businesses[i].id+"&go=false&total="+(totalGoing - 1)+"' class='btn btn-danger' id='"+data.businesses[i].id+"' >Don't Go</a></div>";           
+         }
+          else{
+          html += "<div class='col-xs-2 center'><div> "+totalGoing+" Going</div><a href='/update?id="+data.businesses[i].id+"&go=true&total="+(totalGoing + 1)+"' class='btn btn-success' id='"+data.businesses[i].id+"' >GO</a></div>";           
+         }
+         }
+         else {
+          html += "<div class='col-xs-2 center'><div> "+totalGoing+" Going</div><a href='/update?id="+data.businesses[i].id+"&go=true&total="+(totalGoing + 1)+"' class='btn btn-success' id='"+data.businesses[i].id+"' >GO</a></div>";           
+         }
+       }
+       else {
+        html += "<div class='col-xs-2 center'><div> "+totalGoing+" Going</div><a href='/update?id="+data.businesses[i].id+"&go=true&total="+(totalGoing + 1)+"' class='btn btn-success' id='"+data.businesses[i].id+"' >GO</a></div>"; 
+       }
+      html += "</div>";
     }
-  } else {
-      console.log("Sorry, your browser does not support Web Storage...");
+    $('#results').html(html);
   }
 </script>
 </body>
