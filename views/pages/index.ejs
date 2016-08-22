@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <br>
+
+  <!-- Begin Container -->
+<div class="container">
+  <div class="row">
+        <div class="input-group">
+      <input type="text" class="form-control" placeholder="Search for..." id="seachInput">
+      <span class="input-group-btn">
+        <a class="btn btn-default" onclick="yelpInfo()">Go!</a>
+      </span>
+    </div><!-- /input-group -->
+  </div>
+  <br>
+  <div id="results"></div>
+</div>
+  <!-- /.container -->
+
+<script>
+function yelpInfo() {
+  var loc = $('#seachInput').val();
+  // store the location
+  // Check browser support
+  if (typeof(Storage) !== "undefined") {
+      // Store
+      sessionStorage.setItem("search", loc);
+  } else {
+      console.log("Sorry, your browser does not support Web Storage...");
+  }
+  // call the yelp api
+  $.ajax({
+        type: 'GET',
+        url: '/yelp?loc='+loc,
+        success: function(data) {
+            console.log(data);
+            var html = "";
+            $('#results').html(html);
+            for(var i = 0; i < data.businesses.length; i++){
+              html += "<div class='row dot'>";
+              html += "<div class='col-xs-2'><img src='"+data.businesses[i].image_url+"' /></div>";
+               html += "<div class='col-xs-8'><b><span>"+data.businesses[i].name+"</span></b><div>"+data.businesses[i].snippet_text+"</div><div>Rating: "+data.businesses[i].rating+"</div></div>";
+              html += "<div class='col-xs-2 center'><div> 0 Going</div><a href='' class='btn btn-success'>GO</a></div>";
+              html += "</div>";
+            }
+            $('#results').html(html);
+        }
+    });
+}
+  if (typeof(Storage) !== "undefined") {
+    if (sessionStorage.search) {
+      $('#seachInput').val(sessionStorage.getItem("search"));
+      $.ajax({
+        type: 'GET',
+        url: '/yelp?loc='+sessionStorage.getItem("search"),
+        success: function(data) {
+            console.log(data);
+            var html = "";
+            $('#results').html(html);
+            for(var i = 0; i < data.businesses.length; i++){
+              html += "<div class='row dot'>";
+              html += "<div class='col-xs-2'><img src='"+data.businesses[i].image_url+"' /></div>";
+               html += "<div class='col-xs-8'><b><span>"+data.businesses[i].name+"</span></b><div>"+data.businesses[i].snippet_text+"</div><div>Rating: "+data.businesses[i].rating+"</div></div>";
+              html += "<div class='col-xs-2 center'><div> 0 Going</div><a href='' class='btn btn-success'>GO</a></div>";
+              html += "</div>";
+            }
+            $('#results').html(html);
+        }
+    });
+    }
+  } else {
+      console.log("Sorry, your browser does not support Web Storage...");
+  }
+</script>
+</body>
+</html>
