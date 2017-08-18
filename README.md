@@ -1,3 +1,7 @@
+# Important - Please Read
+
+Due to the Stormpath User API being shutdown, this app no longer works. It needs to be updated to use other authentication methods.
+
 # API Basejump: Build a Nightlife Coordination App
 
 A NodeJS App that uses the Yelp API. The app allows for users to search for bars in their area and they can indicate if they are going to there.
